@@ -114,7 +114,7 @@ namespace TIMONIN_PR
         public static void Thank()
         {
             Console.WriteLine();
-            Console.WriteLine("Спасибо что выбрали банк  «Надежный»");
+            Console.WriteLine("Спасибо, что выбрали банк  «Надежный»");
         }
     }
 }
