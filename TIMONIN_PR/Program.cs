@@ -101,8 +101,7 @@ namespace TIMONIN_PR
     [Serializable]
     class Admin : People, IAdmin_action
     {
-        private List<Clients> all_clients { get; set; }
-        
+        public List<Clients> all_clients { get; set; }        
 
         public Admin(string name, List<Clients> all_clients,
                        string login, string password) : base(name, login, password)
@@ -112,32 +111,55 @@ namespace TIMONIN_PR
 
         public void Add_client(string client_name, double client_money, string client_log, string client_pasword)
         {
-            //some_color_message = ($"Вы создаете нового пользоваетеля");
+            
+            some_color_message ($"{name}, вы создаете нового пользоваетеля");
             some_message($"Имя:{client_name}\n" +
                          $"Количество денег на счету: {client_money} \n" +
                          $"Логин клиента:{client_log}\n" +
                          $"Пароль клиента:{client_pasword}\n");
-
             Clients user = new Clients(client_name, client_money, client_log, client_pasword);
-            all_clients.Add(user);
-            
+            all_clients.Add(user);            
         }
 
         public void Delete_client(int id)
         {
-
+            if (id <all_clients.Count)
+            {
+                some_color_message($"Имя:{all_clients[id].name}\n" +
+                                   $"Логин клиента:{all_clients[id].login}\n" +
+                                   $"УДАЛЕН!");
+                all_clients.RemoveAt(id);
+                
+            }
+            else
+            {
+                some_color_message($"Такого ID еще не создано");
+            }            
         }
 
         public void Show_all_client()
         {
-            throw new NotImplementedException();
+            if (all_clients.Count == 0)
+            {
+                some_color_message($"Пока клиентов нет!");
+            }
+            else
+            {
+                foreach (Clients client in all_clients)
+                {
+                    some_message($"Имя:{client.name}\n" +
+                                 $"Логин клиента:{client.login}\n" +
+                                 $"Пароль клиента:{client.password}\n");
+                    some_color_message("-----------------------------");
+                }
+            }
+                  
         }
     }
 
     static class Save_read_data
     {       
-
-        public static void Save_data_obj<T>( List<T> object_array, string file_name)
+        public static void Save_data_obj<T>(List<T> object_array, string file_name)
         {            
             // создаем объект BinaryFormatter
             BinaryFormatter formatter = new BinaryFormatter();
@@ -183,7 +205,6 @@ namespace TIMONIN_PR
     }
 
     class Operation
-
     {
         public static void Client_Operation(Clients user)
         {
@@ -255,11 +276,14 @@ namespace TIMONIN_PR
 
                 if (choise == 2)
                 {
-
+                    Message.Show_Message("Введите ID клиента для удаления");
+                    int ID= Convert.ToInt32(Console.ReadLine());
+                    user.Delete_client(ID);
                 }
 
                 if (choise == 3)
                 {
+                    user.Show_all_client();
 
                 }
                 Message.Show_Message("Завершить обслуживание (Y) для продолжения нажать любую кнопку");
@@ -299,18 +323,24 @@ namespace TIMONIN_PR
                 for (int account_ad = 0; account_ad < all_admin.Count; account_ad++)
                 {
                     if (write_login == all_admin[account_ad].login && write_password == all_admin[account_ad].password)
-                    {                        
+                    {
+                        Admin main_user = all_admin[account_ad];//например
+                        all_admin.Add(main_user);
                         Operation.Admin_operation(all_admin[account_ad]);
                         admin = true;
                         client = false;
                         break;
                     }
                 }
-                Message.Show_Color_Message ($"Пароль или логин введен неверно");
-                Message.Show_Color_Message($"Пожалуйста, повторите попытку");
-                Message.Show_Color_Message($"Для продолжения нажимте ENTER...");
-                Console.ReadLine();
-                Console.Clear();
+                if (admin == false && client == false)
+                {
+                    Message.Show_Color_Message($"Пароль или логин введен неверно");
+                    Message.Show_Color_Message($"Пожалуйста, повторите попытку");
+                    Message.Show_Color_Message($"Для продолжения нажимте ENTER...");
+                    Console.ReadLine();
+                    Console.Clear();
+                }
+                
             }
         }
     }
@@ -323,22 +353,16 @@ namespace TIMONIN_PR
             Save_read_data.Reade_data_obj<Clients>(out all_clients,"Clients.dat");                      
 
             List<Admin> all_admin = new List<Admin>();           
-            Save_read_data.Reade_data_obj<Admin>(out all_admin, "Admin.dat");
-
-            if (all_admin.Count==0)// Админ должен быть!
-            {   
-                Admin main_user = new Admin("Петр", all_clients, "0", "0");
-                all_admin.Add(main_user);               
-            }           
-
             
+            if (all_admin.Count==0)// Админ должен быть!
+            {                
+                Admin main_user = new Admin("Админ", all_clients, "0", "0");//например
+                all_admin.Add(main_user);               
+            }         
             Autorization.Authorization(all_clients, all_admin);            
-
-
-            Save_read_data.Save_data_obj<Admin>(all_admin, "Admin.dat");
+            
             Save_read_data.Save_data_obj<Clients>(all_clients, "Clients.dat");
-            Console.ReadLine();
-         
+            Console.ReadLine();         
         }      
     }
 }
